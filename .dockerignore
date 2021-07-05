@@ -1,0 +1,7 @@
+# Ignore everything
+**
+
+# ... except for dependencies and source
+!Pipfile
+!Pipfile.lock
+!decapitate_the_spire
