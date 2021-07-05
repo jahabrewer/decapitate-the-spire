@@ -24,13 +24,13 @@ repos:
     types: [python]
     exclude: setup.py
 
-  - id: mypy
-    name: mypy
-    stages: [commit]
-    language: system
-    entry: pipenv run mypy
-    types: [python]
-    require_serial: true
+#  - id: mypy
+#    name: mypy
+#    stages: [commit]
+#    language: system
+#    entry: pipenv run mypy
+#    types: [python]
+#    require_serial: true
 
   - id: pytest
     name: pytest
