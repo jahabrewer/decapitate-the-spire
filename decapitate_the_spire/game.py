@@ -2977,7 +2977,6 @@ class NoOpMove(Move):
 class Character(ABC):
     def __init__(self, ctx: CCG.Context, name: str, max_health: int):
         self.ctx = ctx
-        self.logger = logging.getLogger("STSEnv.Character")
         self.name: str = name
         self.max_health: int = max_health
         self.current_health: int = max_health
@@ -6582,7 +6581,6 @@ class Card(ABC):
         is_ethereal: bool = False,
     ):
         self.ctx = ctx
-        self.logger = logging.getLogger("STSEnv.Card")
         self.card_type = card_type
         self.card_target = card_target
         self.base_damage: Optional[int] = self.base_damage_master
@@ -10512,8 +10510,8 @@ class TheSilent(Player):
     def __init__(
         self,
         ctx: CCG.Context,
-        max_health: int,
-        energy_master: int,
+        max_health: int = 80,
+        energy_master: int = 3,
         starting_deck_override: List[Callable[[CCG.Context], Card]] = None,
         initial_potions: Callable[[CCG.Context], List[Potion]] = None,
     ):
