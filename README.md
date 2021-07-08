@@ -19,7 +19,7 @@ pip install decapitate-the-spire
 To play in a console:
 
 ```sh
-python3 -m decapitate-the-spire
+python3 -m decapitate_the_spire
 ```
 
 If you want to control the game from your own code, start with a core loop like this:
