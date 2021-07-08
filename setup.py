@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
-VERSION = "0.0.3"
-DESCRIPTION = "TODO"
+VERSION = "0.0.6"
+DESCRIPTION = "A headless clone of Mega Crit's Slay the Spire"
 
 
 def readme():
@@ -13,7 +13,7 @@ setup(
     name="decapitate_the_spire",
     version=VERSION,
     author="Janzen Brewer-Krebs",
-    author_email="decapitatethespire@toypiper.com",
+    author_email="janzen@toypiper.com",
     description=DESCRIPTION,
     long_description=readme(),
     long_description_content_type="text/markdown",
