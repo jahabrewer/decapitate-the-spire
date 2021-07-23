@@ -1,7 +1,7 @@
-import decapitate_the_spire.game as dg
+from test import test_utils as tu
+from test.dungeon_test_case import DungeonTestCase
 
-from . import test_utils as tu
-from .dungeon_test_case import DungeonTestCase
+import decapitate_the_spire.game as dg
 
 
 class TestMiniDungeon(DungeonTestCase):

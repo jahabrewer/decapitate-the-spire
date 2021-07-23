@@ -2696,10 +2696,10 @@ class Move(ABC):
     def to_enemy_move_info(self) -> EnemyMoveInfo:
         # Shouldn't be an issue to set -1 as next move. It's only used by legacy Monster to branch in take_turn.
         return EnemyMoveInfo(
-            -1, self.get_intent(), self.get_base_damage(), self.get_multiplier()
+            self.get_intent(), self.get_damage(), self.get_multiplier()
         )
 
-    def get_base_damage(self) -> Optional[int]:
+    def get_damage(self) -> Optional[int]:
         return None
 
     def get_multiplier(self) -> Optional[int]:
@@ -2744,8 +2744,8 @@ class DamageMove(Move, metaclass=ABCMeta):
     def apply_powers(self):
         self.damage_info.apply_powers(self.owner, self.ctx.player)
 
-    def get_base_damage(self) -> Optional[int]:
-        return self.damage_info.base
+    def get_damage(self) -> Optional[int]:
+        return self.damage_info.output
 
     def get_multiplier(self) -> Optional[int]:
         return self.multiplier
@@ -3585,7 +3585,6 @@ class Monster(Character):
         )
 
         super().__init__(ctx, self.__class__.__name__, max_health)
-        self.intent_damage: Optional[int] = None
         self.move_history: List[MoveName] = []
         self.move_overrides = move_overrides
         self.move_overrides_index = 0
@@ -3800,22 +3799,23 @@ class Monster(Character):
         self.get_move(num)
 
     def apply_powers(self):
+        # This ends up setting output in DamageInfo.
         for move in self.names_to_moves.values():
             move.apply_powers()
 
         # These two predicates might mean the same thing; source might use -1 as sentinel to mean "None".
-        if self.move_info.base_damage is not None and self.move_info.base_damage > -1:
-            self._calculate_damage(self.move_info.base_damage)
+        # if self.move_info.base_damage is not None and self.move_info.base_damage > -1:
+        #     self._calculate_damage(self.move_info.base_damage)
 
-    def _calculate_damage(self, damage: int):
-        running_damage = float(damage)
-
-        for power in self.powers:
-            running_damage = power.at_damage_give(running_damage, DamageType.NORMAL)
-
-        # TODO incomplete
-
-        self.intent_damage = max(0, int(running_damage))
+    # def _calculate_damage(self, damage: int):
+    #     running_damage = float(damage)
+    #
+    #     for power in self.powers:
+    #         running_damage = power.at_damage_give(running_damage, DamageType.NORMAL)
+    #
+    #     # TODO incomplete
+    #
+    #     self.intent_damage = max(0, int(running_damage))
 
     def last_move(self, move_name: MoveName):
         assert move_name in self.names_to_moves.keys()
@@ -5653,21 +5653,24 @@ class MonsterGroup:
 class EnemyMoveInfo:
     def __init__(
         self,
-        next_move: int,
         intent: Intent,
-        base_damage: int = None,
+        damage: int = None,
         multiplier: int = None,
     ):
-        self.next_move: int = next_move
         self.intent: Intent = intent
-        self.base_damage: Optional[int] = base_damage
+        # This is calculated damage (with powers applied), not base damage.
+        self.damage: Optional[int] = damage
         # Source appears to use this only for showing intent, not damage calculation
         self.multiplier: Optional[int] = multiplier
 
     def __repr__(self):
-        multiplier_repr = f"{self.multiplier}x " if self.multiplier is not None else ""
-        base_damage_repr = "X" if self.base_damage is None else self.base_damage
-        return f"Next {self.next_move} {self.intent.name} {multiplier_repr}{base_damage_repr}"
+        if self.damage is None:
+            return f"{self.intent.name}: {self.intent}"
+        else:
+            multiplier_repr = (
+                f"{self.multiplier}x " if self.multiplier is not None else ""
+            )
+            return f"{self.intent.name}: {multiplier_repr}{self.damage}"
 
     def is_multi_damage(self):
         return self.multiplier is not None

@@ -1,11 +1,10 @@
 import collections
+from test import test_utils as tu
+from test.dungeon_test_case import DungeonTestCase
 from typing import Callable
 
 import decapitate_the_spire as dts
 import decapitate_the_spire.game as dg
-
-from . import test_utils as tu
-from .dungeon_test_case import DungeonTestCase
 
 
 class TestGame(DungeonTestCase):
@@ -68,7 +67,7 @@ class TestGame(DungeonTestCase):
         )
 
         self.assertEqual(
-            tu.default_monster_max_health - played_card.base_damage,
+            tu.default_monster_max_health - played_card.damage,
             game.ctx.d.get_curr_room().monster_group[0].current_health,
         )
         self.assertEqual(
@@ -160,7 +159,7 @@ class TestGame(DungeonTestCase):
         )
 
         self.assertEqual(
-            tu.default_monster_max_health - game.ctx.player.hand[0].base_damage,
+            tu.default_monster_max_health - game.ctx.player.hand[0].damage,
             game.ctx.d.get_curr_room().monster_group[0].current_health,
         )
 
@@ -981,8 +980,7 @@ class TestGame(DungeonTestCase):
         )
 
         self.assertEqual(
-            monster_max_health
-            - (energy_available * game.ctx.player.hand[0].base_damage),
+            monster_max_health - (energy_available * game.ctx.player.hand[0].damage),
             game.ctx.d.get_curr_room().monster_group[0].current_health,
         )
         self.assertEqual(0, game.ctx.player.energy_manager.player_current_energy)
@@ -1323,7 +1321,9 @@ class TestGame(DungeonTestCase):
             game.step(dg.ActionGenerator.play_card(0, 0))
         )
 
-        self.assertEqual(6, game.ctx.d.get_curr_room().monster_group[0].intent_damage)
+        self.assertEqual(
+            6, game.ctx.d.get_curr_room().monster_group[0].move_info.damage
+        )
 
     def test_slimed_exhausts(self):
         game = tu.create_game(initial_draw_pile_manifest={dg.Slimed.recipe(): 10})
