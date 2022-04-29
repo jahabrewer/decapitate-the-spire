@@ -25,11 +25,15 @@ python3 -m decapitate_the_spire
 If you want to control the game from your own code, start with a core loop like this:
 
 ```python
+import decapitate_the_spire.dungeon
+import decapitate_the_spire.character
+import decapitate_the_spire.map
 from decapitate_the_spire import game as dg
+
 
 def main():
     # Also consider dg.SimpleDungeon and dg.MiniDungeon for testing.
-    game = dg.Game(dg.TheSilent, dg.Exordium)
+    game = dg.Game(decapitate_the_spire.character.TheSilent, decapitate_the_spire.dungeon.Exordium)
 
     is_terminal = False
     while not is_terminal:

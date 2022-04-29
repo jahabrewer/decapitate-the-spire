@@ -1,14 +1,24 @@
+from abc import ABC, abstractmethod
+from typing import Dict, TypeVar, Union, Tuple, Callable, List, Optional
+
+import decapitate_the_spire.action
+import decapitate_the_spire.card
+import decapitate_the_spire.character
+import decapitate_the_spire.dungeon
 import decapitate_the_spire.game as dg
+import decapitate_the_spire.map
+import decapitate_the_spire.potion
+import decapitate_the_spire.relic
 from decapitate_the_spire.rng import Rng
 
 default_player_max_health = 52
 default_energy_per_turn = 3
 default_monster_max_health = 20
 default_initial_draw_pile_manifest = {
-    dg.Strike.recipe(): 5,
-    dg.Defend.recipe(): 5,
-    dg.Survivor.recipe(): 1,
-    dg.Neutralize.recipe(): 1,
+    decapitate_the_spire.card.Strike.recipe(): 5,
+    decapitate_the_spire.card.Defend.recipe(): 5,
+    decapitate_the_spire.card.Survivor.recipe(): 1,
+    decapitate_the_spire.card.Neutralize.recipe(): 1,
 }
 
 
@@ -16,33 +26,34 @@ def create_game(
     player_hp=default_player_max_health,
     energy_per_turn=default_energy_per_turn,
     monster_hp=default_monster_max_health,
-    initial_draw_pile_manifest: dg.Dict[
-        dg.Callable[[dg.CCG.Context], dg.Card], int
+    initial_draw_pile_manifest: Dict[
+        Callable[[dg.CCG.Context], decapitate_the_spire.card.Card], int
     ] = None,
-    monster: dg.Callable[[dg.CCG.Context], dg.Monster] = None,
-    monster_group: dg.Callable[[dg.CCG.Context], dg.MonsterGroup] = None,
-    create_monster_group: dg.Callable[[dg.CCG.Context], dg.MonsterGroup] = None,
-    relics: dg.Callable[[dg.CCG.Context], dg.List[dg.Relic]] = None,
-    potions: dg.Callable[[dg.CCG.Context], dg.List[dg.Potion]] = None,
-    create_dungeon: dg.Callable[[dg.CCG.Context], dg.Dungeon] = None,
+    monster: Callable[[dg.CCG.Context], decapitate_the_spire.character.Monster] = None,
+    monster_group: Callable[[dg.CCG.Context], decapitate_the_spire.character.MonsterGroup] = None,
+    create_monster_group: Callable[[dg.CCG.Context], decapitate_the_spire.character.MonsterGroup] = None,
+    relics: Callable[[dg.CCG.Context], List[decapitate_the_spire.relic.Relic]] = None,
+    potions: Callable[[dg.CCG.Context], List[decapitate_the_spire.potion.Potion]] = None,
+    create_dungeon: Callable[[dg.CCG.Context], decapitate_the_spire.dungeon.Dungeon] = None,
 ) -> dg.Game:
     assert not (bool(monster) and bool(monster_group))
 
     initial_draw_pile = (
-        dg.CardGroup.explode_card_group_recipe_manifest(initial_draw_pile_manifest)
+        decapitate_the_spire.card.CardGroup.explode_card_group_recipe_manifest(initial_draw_pile_manifest)
         if initial_draw_pile_manifest
         else None
     )
 
     def create_player(ctx: dg.CCG.Context):
-        return dg.TheSilent(ctx, player_hp, energy_per_turn, initial_draw_pile, potions)
+        return decapitate_the_spire.character.TheSilent(ctx, player_hp, energy_per_turn, initial_draw_pile, potions)
 
     def create_monster_group_default(ctx: dg.CCG.Context):
         if monster:
-            return dg.MonsterGroup(ctx, [monster(ctx)])
+            return decapitate_the_spire.character.MonsterGroup(ctx, [monster(ctx)])
         elif monster_group:
             return monster_group(ctx)
-        return dg.MonsterGroup(ctx, [dg.SimpleMonster(ctx, monster_hp, 8, 6)])
+        return decapitate_the_spire.character.MonsterGroup(ctx, [
+            decapitate_the_spire.character.SimpleMonster(ctx, monster_hp, 8, 6)])
 
     if create_monster_group is None:
         create_monster_group = create_monster_group_default
@@ -52,47 +63,47 @@ def create_game(
     if not create_dungeon:
 
         def cd(ctx: dg.CCG.Context):
-            return dg.SimpleDungeon(ctx, create_monster_group)
+            return decapitate_the_spire.dungeon.SimpleDungeon(ctx, create_monster_group)
 
         create_dungeon = cd
 
     g = dg.Game(create_player, create_dungeon, relics)
     # Hacky af, but lets me keep using old tests with minimal changes.
-    if isinstance(g.ctx.d, dg.SimpleDungeon):
-        throw_if_step_action_was_illegal(g.step(dg.ActionGenerator.pick_first_path(0)))
+    if isinstance(g.ctx.d, decapitate_the_spire.dungeon.SimpleDungeon):
+        throw_if_step_action_was_illegal(g.step(decapitate_the_spire.action.ActionGenerator.pick_first_path(0)))
     return g
 
 
 def throw_if_step_action_was_illegal(
-    step_output: dg.Tuple[float, bool, dict]
-) -> dg.Tuple[float, bool, dict]:
+    step_output: Tuple[float, bool, dict]
+) -> Tuple[float, bool, dict]:
     if "illegal" in step_output[2] and step_output[2]["illegal"] is True:
         raise Exception("step return indicates illegal action")
     return step_output
 
 
 def throw_if_step_action_was_legal(
-    step_output: dg.Tuple[float, bool, dict]
-) -> dg.Tuple[float, bool, dict]:
+    step_output: Tuple[float, bool, dict]
+) -> Tuple[float, bool, dict]:
     if not ("illegal" in step_output[2] and step_output[2]["illegal"] is True):
         raise Exception("step return indicates legal action")
     return step_output
 
 
-V = dg.TypeVar("V")
+V = TypeVar("V")
 
 
 class SetRestore:
     def __init__(
         self,
-        read_func: dg.Callable[[], V],
-        write_func: dg.Callable[[V], None],
+        read_func: Callable[[], V],
+        write_func: Callable[[V], None],
         replacement_rng: V,
     ):
         self.read_func = read_func
         self.write_func = write_func
         self.replacement_rng = replacement_rng
-        self.rng_to_restore: dg.Optional[V] = None
+        self.rng_to_restore: Optional[V] = None
 
     def __enter__(self):
         self.rng_to_restore = self.read_func()
@@ -158,14 +169,14 @@ class SetRestoreAiRng(SetRestore):
 #         super().__init__(read, write, replacement_asc)
 
 
-class ValueChangeMonitor(dg.ABC):
+class ValueChangeMonitor(ABC):
     def __init__(
-        self, expected_change: dg.Union[int, dg.Tuple[int, int]], negate=False
+        self, expected_change: Union[int, Tuple[int, int]], negate=False
     ):
         self.expected_change = expected_change
         self.negate = negate
 
-    @dg.abstractmethod
+    @abstractmethod
     def read_value(self):
         ...
 
@@ -187,7 +198,7 @@ class ValueChangeMonitor(dg.ABC):
                         f"actual {actual_value}"
                     )
 
-            elif isinstance(self.expected_change, dg.Tuple):
+            elif isinstance(self.expected_change, Tuple):
                 if self.negate:
                     # Having an exclusive upper bound gets wonky when negating a range. Pretty sure this is right.
                     low_delta = -(self.expected_change[1] + 1)
@@ -207,8 +218,8 @@ class ValueChangeMonitor(dg.ABC):
 class CharacterHealthChangeMonitor(ValueChangeMonitor):
     def __init__(
         self,
-        character: dg.dts.game.Character,
-        amount: dg.Union[int, dg.Tuple[int, int]],
+        character: decapitate_the_spire.character.Character,
+        amount: Union[int, Tuple[int, int]],
         negate=False,
     ):
         super().__init__(amount, negate)
@@ -221,8 +232,8 @@ class CharacterHealthChangeMonitor(ValueChangeMonitor):
 class FirstMonsterDamageMonitor(CharacterHealthChangeMonitor):
     def __init__(
         self,
-        game: dg.dts.game.Game,
-        damage: dg.Union[int, dg.Tuple[int, int]],
+        game: dg.Game,
+        damage: Union[int, Tuple[int, int]],
     ):
         super().__init__(
             game.ctx.d.get_curr_room().monster_group[0], damage, negate=True
@@ -232,8 +243,8 @@ class FirstMonsterDamageMonitor(CharacterHealthChangeMonitor):
 class PlayerDamageMonitor(CharacterHealthChangeMonitor):
     def __init__(
         self,
-        game: dg.dts.game.Game,
-        damage: dg.Union[int, dg.Tuple[int, int]],
+        game: dg.Game,
+        damage: Union[int, Tuple[int, int]],
     ):
         super().__init__(game.ctx.player, damage, negate=True)
 
@@ -241,8 +252,8 @@ class PlayerDamageMonitor(CharacterHealthChangeMonitor):
 class PlayerGoldMonitor(ValueChangeMonitor):
     def __init__(
         self,
-        game: dg.dts.game.Game,
-        change: dg.Union[int, dg.Tuple[int, int]],
+        game: dg.Game,
+        change: Union[int, Tuple[int, int]],
     ):
         super().__init__(change)
         self.game = game
@@ -254,8 +265,8 @@ class PlayerGoldMonitor(ValueChangeMonitor):
 class HandSizeChangeMonitor(ValueChangeMonitor):
     def __init__(
         self,
-        game: dg.dts.game.Game,
-        amount: dg.Union[int, dg.Tuple[int, int]],
+        game: dg.Game,
+        amount: Union[int, Tuple[int, int]],
     ):
         super().__init__(amount)
         self.game = game
@@ -267,8 +278,8 @@ class HandSizeChangeMonitor(ValueChangeMonitor):
 class EnergyChangeMonitor(ValueChangeMonitor):
     def __init__(
         self,
-        game: dg.dts.game.Game,
-        amount: dg.Union[int, dg.Tuple[int, int]],
+        game: dg.Game,
+        amount: Union[int, Tuple[int, int]],
     ):
         super().__init__(amount)
         self.game = game
@@ -280,13 +291,13 @@ class EnergyChangeMonitor(ValueChangeMonitor):
 class CardGoesToDiscardMonitor:
     def __init__(
         self,
-        game: dg.dts.game.Game,
-        card_index: dg.Union[int, dg.List[int]],
+        game: dg.Game,
+        card_index: Union[int, List[int]],
     ):
         self.game = game
         if isinstance(card_index, int):
             self.card_indexes = [card_index]
-        elif isinstance(card_index, dg.List):
+        elif isinstance(card_index, List):
             self.card_indexes = card_index
         else:
             raise ValueError(card_index)

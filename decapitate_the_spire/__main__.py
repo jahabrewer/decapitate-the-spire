@@ -2,6 +2,11 @@ import logging
 import sys
 from typing import List
 
+import decapitate_the_spire.action
+import decapitate_the_spire.character
+import decapitate_the_spire.dungeon
+import decapitate_the_spire.map
+import decapitate_the_spire.request
 from decapitate_the_spire import game as dg
 
 
@@ -37,7 +42,7 @@ def main():
     energy_per_turn = 3
 
     def create_player(ctx):
-        return dg.TheSilent(ctx, max_health, energy_per_turn)
+        return decapitate_the_spire.character.TheSilent(ctx, max_health, energy_per_turn)
 
     # monster_list = [
     #     AcidSlimeS,
@@ -54,7 +59,7 @@ def main():
     #     # raise Exception(f'Unknown monster: {monster_name}')
     #     return MonsterGroup(ctx, [monster_type(ctx)])
 
-    game = dg.Game(create_player, create_dungeon=dg.Exordium)
+    game = dg.Game(create_player, create_dungeon=decapitate_the_spire.dungeon.Exordium)
     # game = Game(create_player, create_dungeon=lambda ctx: dg.SimpleDungeon(ctx, create_monster_group))
     is_terminal = False
 
@@ -63,9 +68,9 @@ def main():
 
         if isinstance(
             game.ctx.action_manager.outstanding_request,
-            (dg.PathChoiceRequest, dg.FirstPathChoiceRequest),
+            (decapitate_the_spire.action.PathChoiceRequest, decapitate_the_spire.action.FirstPathChoiceRequest),
         ):
-            print(dg.MapGenerator.to_string(game.ctx.d.mapp, True))
+            print(decapitate_the_spire.map.MapGenerator.to_string(game.ctx.d.mapp, True))
         print(game.ctx.action_manager.outstanding_request)
         print()
         pretty_print_action_mask(without_all_false_rows_at_end(action_mask))
