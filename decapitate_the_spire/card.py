@@ -40,6 +40,7 @@ class Card(ABC):
 
     def __init__(
         self,
+        name: str,
         ctx: CCG.Context,
         cost: int,
         card_type: CardType,
@@ -51,6 +52,7 @@ class Card(ABC):
         self_retain: bool = False,
         is_ethereal: bool = False,
     ):
+        self.name = name
         self.ctx = ctx
         self.card_type = card_type
         self.card_target = card_target
@@ -519,7 +521,7 @@ class Strike(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Strike", ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
 
     def _repr_impl(self):
         return "Strk", self.base_damage
@@ -541,7 +543,7 @@ class DebugStrike(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context, damage: int = 999):
-        super().__init__(ctx, 0, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("DebugStrike", ctx, 0, CardType.ATTACK, CardTarget.ENEMY)
         self.base_damage = damage
 
     def _repr_impl(self):
@@ -565,7 +567,7 @@ class Defend(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.SELF)
+        super().__init__("Defend", ctx, 1, CardType.SKILL, CardTarget.SELF)
 
     def _repr_impl(self):
         return "Def", self.block
@@ -581,7 +583,7 @@ class Backstab(Card):
 
     def __init__(self, ctx: CCG.Context):
         super().__init__(
-            ctx, 0, CardType.ATTACK, CardTarget.ENEMY, exhaust=True, is_innate=True
+            "Backstab", ctx, 0, CardType.ATTACK, CardTarget.ENEMY, exhaust=True, is_innate=True
         )
         self.base_damage = 11
 
@@ -606,7 +608,7 @@ class Footwork(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.POWER, CardTarget.SELF)
+        super().__init__("Footwork", ctx, 1, CardType.POWER, CardTarget.SELF)
 
     def _repr_impl(self):
         return "Ftw", self.magic_number
@@ -628,7 +630,7 @@ class Survivor(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.SELF)
+        super().__init__("Survivor", ctx, 1, CardType.SKILL, CardTarget.SELF)
         self.base_block = 8
 
     def _repr_impl(self):
@@ -644,7 +646,7 @@ class Slimed(Card):
     color = CardColor.COLORLESS
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.STATUS, CardTarget.SELF, exhaust=True)
+        super().__init__("Slimed", ctx, 1, CardType.STATUS, CardTarget.SELF, exhaust=True)
 
     def _repr_impl(self):
         return "Slmd", None
@@ -662,7 +664,7 @@ class Neutralize(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 0, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Neutralize", ctx, 0, CardType.ATTACK, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Neu", self.damage
@@ -693,7 +695,7 @@ class Alchemize(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.SELF, exhaust=True)
+        super().__init__("Alchemize", ctx, 1, CardType.SKILL, CardTarget.SELF, exhaust=True)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Alc", None
@@ -710,7 +712,7 @@ class Concentrate(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 0, CardType.SKILL, CardTarget.SELF)
+        super().__init__("Concentrate", ctx, 0, CardType.SKILL, CardTarget.SELF)
         self.base_magic_number = 3
         self.magic_number = self.base_magic_number
 
@@ -732,7 +734,7 @@ class AllOutAttack(Card):
 
     def __init__(self, ctx: CCG.Context):
         super().__init__(
-            ctx, 1, CardType.ATTACK, CardTarget.ALL_ENEMY, is_multi_damage=True
+            "All Out Attack", ctx, 1, CardType.ATTACK, CardTarget.ALL_ENEMY, is_multi_damage=True
         )
 
     def _repr_impl(self) -> Tuple[str, Any]:
@@ -752,7 +754,7 @@ class Wound(Card):
     color = CardColor.COLORLESS
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, -2, CardType.STATUS, CardTarget.NONE)
+        super().__init__("Wound", ctx, -2, CardType.STATUS, CardTarget.NONE)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Woun", None
@@ -768,7 +770,7 @@ class Smite(Card):
 
     def __init__(self, ctx: CCG.Context):
         super().__init__(
-            ctx, 1, CardType.ATTACK, CardTarget.ENEMY, exhaust=True, self_retain=True
+            "Smite", ctx, 1, CardType.ATTACK, CardTarget.ENEMY, exhaust=True, self_retain=True
         )
         self.base_damage = 12
 
@@ -792,7 +794,7 @@ class Skewer(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, -1, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Skewer", ctx, -1, CardType.ATTACK, CardTarget.ENEMY)
         self.base_damage = 7
 
     def _repr_impl(self) -> Tuple[str, Any]:
@@ -819,7 +821,7 @@ class GlassKnife(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, -1, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("GlassKnife", ctx, -1, CardType.ATTACK, CardTarget.ENEMY)
         self.base_damage = self.base_damage_master
 
     def _repr_impl(self) -> Tuple[str, Any]:
@@ -845,7 +847,7 @@ class AscendersBane(Card):
     color = CardColor.CURSE
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, -2, CardType.CURSE, CardTarget.NONE, is_ethereal=True)
+        super().__init__("Ascender's Bane", ctx, -2, CardType.CURSE, CardTarget.NONE, is_ethereal=True)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "AscB", None
@@ -861,7 +863,7 @@ class Acrobatics(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.NONE)
+        super().__init__("Acrobatics", ctx, 1, CardType.SKILL, CardTarget.NONE)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Acro", self.magic_number
@@ -879,7 +881,7 @@ class Backflip(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.SELF)
+        super().__init__("Backflip", ctx, 1, CardType.SKILL, CardTarget.SELF)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Bkfl", self.block
@@ -896,7 +898,7 @@ class Bane(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Bane", ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Bane", self.damage
@@ -919,7 +921,7 @@ class DeadlyPoison(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.ENEMY)
+        super().__init__("Deadly Poison", ctx, 1, CardType.SKILL, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "DPoi", self.magic_number
@@ -940,7 +942,7 @@ class Regret(Card):
     color = CardColor.CURSE
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, -2, CardType.CURSE, CardTarget.NONE)
+        super().__init__("Regret", ctx, -2, CardType.CURSE, CardTarget.NONE)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Rgrt", None
@@ -973,7 +975,7 @@ class BladeDance(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.NONE)
+        super().__init__("Blade Dance", ctx, 1, CardType.SKILL, CardTarget.NONE)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "BDnc", self.magic_number
@@ -997,7 +999,7 @@ class Shiv(Card):
     color = CardColor.COLORLESS
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 0, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Shiv", ctx, 0, CardType.ATTACK, CardTarget.ENEMY)
         # TODO accuracy
 
     def _repr_impl(self) -> Tuple[str, Any]:
@@ -1022,7 +1024,7 @@ class CloakAndDagger(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.SELF)
+        super().__init__("Cloak and Dagger", ctx, 1, CardType.SKILL, CardTarget.SELF)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "CDgr", self.magic_number
@@ -1048,7 +1050,7 @@ class DaggerSpray(Card):
 
     def __init__(self, ctx: CCG.Context):
         super().__init__(
-            ctx, 1, CardType.ATTACK, CardTarget.ALL_ENEMY, is_multi_damage=True
+            "Dagger Spray", ctx, 1, CardType.ATTACK, CardTarget.ALL_ENEMY, is_multi_damage=True
         )
 
     def _repr_impl(self) -> Tuple[str, Any]:
@@ -1070,7 +1072,7 @@ class DaggerThrow(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Dagger Throw", ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "DThr", self.damage
@@ -1092,7 +1094,7 @@ class Deflect(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 0, CardType.SKILL, CardTarget.SELF)
+        super().__init__("Deflect", ctx, 0, CardType.SKILL, CardTarget.SELF)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Defl", self.block
@@ -1108,7 +1110,7 @@ class DodgeAndRoll(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.SELF)
+        super().__init__("Dodge and Roll", ctx, 1, CardType.SKILL, CardTarget.SELF)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "D&Rl", self.block
@@ -1132,7 +1134,7 @@ class FlyingKnee(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Flying Knee", ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "FlyK", self.damage
@@ -1160,7 +1162,7 @@ class Outmaneuver(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.NONE)
+        super().__init__("Outmaneuver", ctx, 1, CardType.SKILL, CardTarget.NONE)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Outm", self.magic_number
@@ -1183,7 +1185,7 @@ class PiercingWail(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.ALL_ENEMY, exhaust=True)
+        super().__init__("Piercing Wail", ctx, 1, CardType.SKILL, CardTarget.ALL_ENEMY, exhaust=True)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "PrWl", self.magic_number
@@ -1218,7 +1220,7 @@ class PoisonedStab(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.SKILL, CardTarget.ENEMY)
+        super().__init__("Poisoned Stab", ctx, 1, CardType.SKILL, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "PStb", self.damage
@@ -1246,7 +1248,7 @@ class Prepared(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 0, CardType.SKILL, CardTarget.NONE)
+        super().__init__("Prepared", ctx, 0, CardType.SKILL, CardTarget.NONE)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Prep", self.magic_number
@@ -1264,7 +1266,7 @@ class QuickSlash(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Quick Slash", ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "QkSl", self.damage
@@ -1285,7 +1287,7 @@ class Slice(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 0, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Slice", ctx, 0, CardType.ATTACK, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Slce", self.damage
@@ -1306,7 +1308,7 @@ class SneakyStrike(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 2, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Sneaky Strike", ctx, 2, CardType.ATTACK, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "SStr", self.damage
@@ -1329,7 +1331,7 @@ class SuckerPunch(Card):
     color = CardColor.GREEN
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
+        super().__init__("Sucker Punch", ctx, 1, CardType.ATTACK, CardTarget.ENEMY)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "SkrP", self.damage
@@ -1355,7 +1357,7 @@ class Dazed(Card):
     color = CardColor.COLORLESS
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, -2, CardType.STATUS, CardTarget.NONE, is_ethereal=True)
+        super().__init__("Dazed", ctx, -2, CardType.STATUS, CardTarget.NONE, is_ethereal=True)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Dazd", None
@@ -1371,7 +1373,7 @@ class Burn(Card):
     color = CardColor.COLORLESS
 
     def __init__(self, ctx: CCG.Context):
-        super().__init__(ctx, -2, CardType.STATUS, CardTarget.NONE)
+        super().__init__("Burn", ctx, -2, CardType.STATUS, CardTarget.NONE)
 
     def _repr_impl(self) -> Tuple[str, Any]:
         return "Burn", self.magic_number

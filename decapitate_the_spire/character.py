@@ -665,8 +665,8 @@ class Monster(Character):
         self._turns_taken = 0
 
     def __repr__(self):
-        dead_repr = "DEAD" if self.is_dead else "D̶E̶A̶D̶"
-        escaped_repr = "ESCAPED" if self.escaped else "E̶S̶C̶A̶P̶E̶D̶"
+        dead_repr = "DEAD" if self.is_dead else "NOT DEAD"
+        escaped_repr = "ESCAPED" if self.escaped else "NOT ESCAPED"
         liveness_repr = f'\t{"LIVENESS":12s}: {dead_repr} {escaped_repr}' + os.linesep
         intent_repr = f'\t{"INTENT":12s}: {self.next_move_name.name}: {self.next_move}'
 

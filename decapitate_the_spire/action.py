@@ -15,8 +15,8 @@ from decapitate_the_spire.enums import Screen, RoomPhase, Intent, CardType, Card
 from decapitate_the_spire.util import flatten
 
 if TYPE_CHECKING:
-    from decapitate_the_spire.game import CCG, ActionMaskSlices, ActionCoord, ActionCoordConsumer
     from decapitate_the_spire.power import Power, MinionPower, PoisonPower
+    from decapitate_the_spire.game import CCG, ActionMaskSlices, ActionCoord, ActionCoordConsumer
     from decapitate_the_spire.potion import Potion
     from decapitate_the_spire.rewards import RewardItem, RelicRewardItem
     from decapitate_the_spire.card import Card, Burn, CardGroup, CardQueueItem
@@ -439,6 +439,7 @@ class PowerOrPowerTypeAction(Action):
     @final
     def act(self):
         # Find the power instance if it wasn't specified
+        from decapitate_the_spire.power import Power
         if isinstance(self.power_or_power_type, Power):
             power = self.power_or_power_type
         else:
@@ -947,7 +948,6 @@ class AddStolenGoldToMonsterAction(TargetCharacterAction):
         self.source = source
 
     def act(self):
-        assert isinstance(self.target, Player)
         self.source.stolen_gold += min(self.source.gold_amount, self.target.gold)
 
 
@@ -971,6 +971,7 @@ class LoseBlockAction(TargetCharacterAction):
 class BurnIncreaseAction(Action):
     def act(self):
         # Source does this with ShowCardAndAddToDiscardEffect
+        from decapitate_the_spire.card import Burn
         burn = Burn(self.ctx)
         burn.upgrade()
         self.ctx.action_manager.add_to_bottom(
@@ -2147,6 +2148,7 @@ class CombatActionRequest(PlayerRequest):
                 card_slice.append(card.can_use(None))
 
             else:
+                # print("Putting empty card for card " + str(card_index))
                 card_slice = [False] * (MAX_NUM_MONSTERS_IN_GROUP + 1)
 
             play_card_slices.append(card_slice)

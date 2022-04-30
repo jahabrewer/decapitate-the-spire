@@ -30,7 +30,7 @@ class Relic(ABC):
         self.is_pulsing = False
 
     def __repr__(self) -> str:
-        pulsing_repr = "✓" if self.is_pulsing else "✗"
+        pulsing_repr = "y" if self.is_pulsing else "n"
         counter_repr = ""
         if self.counter >= 0:
             counter_repr = f" {self.counter}"

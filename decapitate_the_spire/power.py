@@ -3,18 +3,16 @@ from __future__ import annotations
 import logging
 from abc import ABC, ABCMeta
 from typing import Optional, final, List
+from typing import TYPE_CHECKING
 
 from decapitate_the_spire.action import Action, RemoveSpecificPowerAction, DamageType, UseCardAction, DamageInfo, \
     ApplyPowerAction, GainBlockAction, ReducePowerAction, PoisonLoseHpAction, DamageAction
 
-from typing import TYPE_CHECKING
-
+from decapitate_the_spire.enums import CardType
 if TYPE_CHECKING:
     from decapitate_the_spire.card import Card
-    from decapitate_the_spire.enums import CardType
-    from decapitate_the_spire.character import Character, Monster, Player
     from decapitate_the_spire.game import CCG
-
+    from decapitate_the_spire.character import Character, Monster
 logger = logging.getLogger(__name__)
 
 
@@ -275,7 +273,7 @@ class RitualPower(Power):
         super().__init__(ctx, owner, amount)
         self.on_player = on_player
         self.skip_first = True
-        assert on_player == isinstance(owner, Player)
+        # assert on_player == isinstance(owner, Player)
 
     def at_end_of_turn(self, is_player: bool):
         if is_player:

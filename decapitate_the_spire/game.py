@@ -18,7 +18,7 @@ from decapitate_the_spire.relic import Relic
 from decapitate_the_spire.rng import Rng
 from decapitate_the_spire.room import MonsterRoom
 from decapitate_the_spire.screen import CombatRewardScreen
-from decapitate_the_spire.enums import Screen
+from decapitate_the_spire.enums import Screen, RoomPhase
 
 logger = logging.getLogger(__name__)
 
@@ -127,8 +127,6 @@ class CCG:
             self.d.get_curr_room().monster_group.apply_powers()
 
 
-
-
 # class RewardType:
 #     CARD = 0
 #     GOLD = 1
@@ -207,13 +205,13 @@ class Game:
         info = {}
 
         # Give a reward per floor climbed
-        # start_floor = self.ctx.d.floor_num
-        # start_total_monster_health = None
+        start_floor = self.ctx.d.floor_num
+        start_total_monster_health = None
         # # start_monster_health_proportion = None
-        # if self.ctx.d.get_curr_room().phase == RoomPhase.COMBAT:
-        #     start_total_monster_health = sum([m.current_health for m in self.ctx.d.get_curr_room().monster_group])
-        #     m = self.ctx.d.get_curr_room().monster_group[0]
-        #     # start_monster_health_proportion = m.current_health / m.max_health
+        if self.ctx.d.get_curr_room().phase == RoomPhase.COMBAT:
+            start_total_monster_health = sum([m.current_health for m in self.ctx.d.get_curr_room().monster_group])
+            m = self.ctx.d.get_curr_room().monster_group[0]
+            # start_monster_health_proportion = m.current_health / m.max_health
         start_player_health = self.ctx.player.current_health
 
         # Ensure action is valid
@@ -224,7 +222,7 @@ class Game:
             self.history.append((action, "invalid"))
             return self._pinch(action)
         else:
-            # reward += 0.001
+            reward += 0.001
             # Only set response if action is valid, right?
             if self.ctx.action_manager.outstanding_request:
                 self.ctx.action_manager.outstanding_request.set_response(action)
@@ -258,33 +256,36 @@ class Game:
                     print(self.ctx.d)
                     assert False
 
-            # if self.ctx.d.floor_num > start_floor:
-            #     # Do it like this for floor skips like secret portal?
-            #     amount = self.ctx.d.floor_num - start_floor
-            #     reward += amount
-            #     logger.debug(f'Rewarding {amount} for floor increment, now {reward}')
-            # if self.ctx.d.get_curr_room().phase == RoomPhase.COMBAT and start_total_monster_health is not None:
-            #     if sum([m.current_health for m in self.ctx.d.get_curr_room().monster_group]) - start_total_monster_health < 0:
-            #         amount = 1
-            #         reward += amount
-            #         logger.debug(f'Rewarding {amount} for monster damage, now {reward}')
+            if self.ctx.d.floor_num > start_floor:
+                # Do it like this for floor skips like secret portal?
+                amount = self.ctx.d.floor_num - start_floor
+                reward += amount * 3
+                logger.debug(f'Rewarding {amount} for floor increment, now {reward}')
+            if self.ctx.d.get_curr_room().phase == RoomPhase.COMBAT and start_total_monster_health is not None:
+                change_in_health = sum(
+                    [m.current_health for m in self.ctx.d.get_curr_room().monster_group]) - start_total_monster_health
+                if change_in_health < 0:
+                    amount = .002 * abs(change_in_health)
+                    reward += amount
+                    logger.debug(f'Rewarding {amount} for monster damage, now {reward}')
             player_health_change = self.ctx.player.current_health - start_player_health
-            # health_change_reward_multiplier = .005
-            health_change_reward_multiplier = 1
+            health_change_reward_multiplier = .005
+            # health_change_reward_multiplier = 1
             reward += player_health_change * health_change_reward_multiplier
 
         self.history.append((action, self.ctx.action_manager.outstanding_request))
         return reward, is_terminal, info
 
     def _win(self):
+        print("GAME OVER: WIN")
         self.logger.debug("Game over: WIN")
         self.game_over_and_won = True
-        return 1.0, True, {"win": True}
+        return 100.0, True, {"win": True}
 
     def _loss(self):
         self.logger.debug("Game over: LOSS")
         self.game_over_and_won = False
-        return -1.0, True, {"win": False}
+        return -100.0, True, {"win": False}
 
     def _pinch(self, action):
         self.logger.debug(f"Pinching for illegal move: {action}")

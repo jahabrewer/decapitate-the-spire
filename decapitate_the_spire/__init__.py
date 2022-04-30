@@ -1,9 +1,12 @@
+import logging
+
 import decapitate_the_spire.card
 import decapitate_the_spire.character
 import decapitate_the_spire.game
 import decapitate_the_spire.power
 import decapitate_the_spire.relic
 
+logging._defaultFormatter = logging.Formatter(u"%(message)s")
 SILENT_CARD_UNIVERSE = [
     decapitate_the_spire.card.Strike,
     decapitate_the_spire.card.DebugStrike,
